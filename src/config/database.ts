@@ -11,6 +11,14 @@ CREATE TABLE IF NOT EXISTS users (
 )
 `;
 
+const AUTHOR_SCHEMA = `
+CREATE TABLE IF NOT EXISTS authors (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, 
+    name VARCHAR(40) NOT NULL,
+    url_photo TEXT 
+)
+`;
+
 const BOOKS_SCHEMA =
     `
 CREATE TABLE IF NOT EXISTS books (
@@ -27,6 +35,7 @@ CREATE TABLE IF NOT EXISTS books (
 db.serialize(() => {
     db.run("PRAGMA foreign_keys=ON");
     db.run(USERS_SCHEMA);
+    db.run(AUTHOR_SCHEMA);
     db.run(BOOKS_SCHEMA);
 });
 

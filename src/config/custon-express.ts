@@ -1,9 +1,7 @@
 import express from "express";
-import booksRoutes from '../api/routes/books-routes';
-
+import routes from '../api/routes/routes'
 const app = express();
 app.use(express.json());
-
-booksRoutes(app);
+routes(app);
 
 export default app;

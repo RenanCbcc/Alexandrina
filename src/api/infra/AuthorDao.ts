@@ -1,15 +1,15 @@
-import Book from "../models/Book";
+import Author from "../models/Author";
 
-export default class BookDao {
+export default class AuthorDao {
 
     constructor(private readonly _db: any) { }
 
-    list(): Promise<Book[]> {
+    list(): Promise<Author[]> {
         return new Promise((resolve, reject) => {
             this._db.all(
-                'SELECT * FROM books',
-                (error: Error, result: Book[]) => {
-                    if (error) return reject('It was not possible to list all books!');
+                'SELECT * FROM authors',
+                (error: Error, result: Author[]) => {
+                    if (error) return reject('It was not possible to list all authors!');
 
                     return resolve(result);
                 }
@@ -23,40 +23,34 @@ export default class BookDao {
             this._db.get(
                 `
                     SELECT *
-                    FROM books
+                    FROM authors
                     WHERE id = ?
                 `,
                 [id],
-                (error: Error, book: Book) => {
+                (error: Error, author: Author) => {
                     if (error) {
-                        return reject('It aws not possible to find the book!');
+                        return reject('It aws not possible to find the author!');
                     }
-                    return resolve(book);
+                    return resolve(author);
                 }
             );
         });
     }
 
-    add(book: Book) { 
+    add(author: Author) {
         return new Promise((resolve, reject) => {
             this._db.run(`
-                INSERT INTO books (
-                    title, 
-                    authorid,
-                    description,
-                    code                    
-                ) values (?,?,?,?)
+                INSERT INTO authors (
+                    name                    
+                ) values (?)
                 `,
                 [
-                    book.title,
-                    book.authorid,
-                    book.description,
-                    book.code
+                    author.name
                 ],
-                function (error:Error) {
+                function (error: Error) {
                     if (error) {
                         console.log(error);
-                        return reject('It was not possible to add a new book!');
+                        return reject('It was not possible to add a new author!');
                     }
 
                     resolve();
@@ -65,23 +59,18 @@ export default class BookDao {
         });
     }
 
-    update(book: Book) {
+    update(author: Author) {
         return new Promise((resolve, reject) => {
             this._db.run(`
-                UPDATE books SET
-                title = ?,                
-                description = ?,
-                available = ?,
-                WHERE id = ?
+                UPDATE authors SET
+                name = ?
             `,
                 [
-                    book.title,                    
-                    book.description,
-                    book.available
+                    author.name
                 ],
                 (error: Error) => {
                     if (error) {
-                        return reject('It was not possible to upadate the book!');
+                        return reject('It was not possible to upadate the author!');
                     }
 
                     resolve();
@@ -95,13 +84,13 @@ export default class BookDao {
             this._db.get(
                 `
                     DELETE 
-                    FROM books
+                    FROM authors
                     WHERE id = ?
                 `,
                 [id],
                 (error: Error) => {
                     if (error) {
-                        return reject('It was not possible to remove the book!');
+                        return reject('It was not possible to remove the author!');
                     }
                     return resolve();
                 }

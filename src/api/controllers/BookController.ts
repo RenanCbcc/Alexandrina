@@ -11,9 +11,8 @@ export default class BookController {
         return (request: Request, response: Response) => {
             const dao = new BookDao(db);
             dao.list()
-                .then(books => response.json(books))
+                .then(entities => response.json(entities))
                 .catch(error => console.log(error));
-
         }
     }
 
@@ -22,7 +21,7 @@ export default class BookController {
             const id = request.params.id;
             const dao = new BookDao(db);
             dao.search(parseInt(id))
-                .then(book => response.json(book))
+                .then(entity => response.json(entity))
                 .catch(error => console.log(error));
         }
     }
@@ -37,7 +36,7 @@ export default class BookController {
 
             const dao = new BookDao(db);
             dao.update(request.body)
-                .then(() => response.status(200).send())
+                .then(() => response.status(200).send('Success!'))
                 .catch(erro => console.log(erro));
         }
     }
@@ -50,7 +49,7 @@ export default class BookController {
             }
             const dao = new BookDao(db);
             dao.add(request.body)
-                .then(() => response.status(201).send())
+                .then(() => response.status(201).send('Created!'))
                 .catch(erro => console.log(erro));
         }
     }
