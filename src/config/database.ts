@@ -1,49 +1,25 @@
-const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('alexandrina.db');
+import mongoose from 'mongoose'
 
-const USERS_SCHEMA = `
-CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT, 
-    name VARCHAR(40) NOT NULL, 
-    email VARCHAR(255) NOT NULL UNIQUE, 
-    password VARCHAR(255) NOT NULL,
-    url_photo TEXT
-)
-`;
+export default (url: string) => {
+    mongoose.connect('mongodb://' + url, {
+        useNewUrlParser: true,
+        useCreateIndex: true,
+        useUnifiedTopology: true
+    });
+    const db = mongoose.connection;
 
-const AUTHOR_SCHEMA = `
-CREATE TABLE IF NOT EXISTS authors (
-    id INTEGER PRIMARY KEY AUTOINCREMENT, 
-    name VARCHAR(40) NOT NULL,
-    url_photo TEXT 
-)
-`;
+    db.on('error', function (error) {
+        console.log('connection error: ' + error)
+    });
 
-const BOOKS_SCHEMA =
-    `
-CREATE TABLE IF NOT EXISTS books (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    authorid INTEGER NOT NULL,
-    title TEXT NOT NULL,    
-    description TEXT DEFAULT ('') NOT NULL,
-    code VARCHAR(13) NOT NULL UNIQUE,
-    available BOOLEAN DEFAULT (1) NOT NULL,
-    url_cover TEXT
-)
-`;
+    db.on('connected', function () {
+        console.log("💾 Connected to the database.");
+    });
 
-db.serialize(() => {
-    db.run("PRAGMA foreign_keys=ON");
-    db.run(USERS_SCHEMA);
-    db.run(AUTHOR_SCHEMA);
-    db.run(BOOKS_SCHEMA);
-});
+    db.on('disconnected', function () {
+        console.log("💾 Disconnected to the database.");
+    });    
 
-process.on('SIGINT', () =>
-    db.close(() => {
-        console.log('DB shot down!');
-        process.exit(0);
-    })
-);
+    return db;
+}
 
-export default db;

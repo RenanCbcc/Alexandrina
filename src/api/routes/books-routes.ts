@@ -2,6 +2,7 @@ import express from 'express';
 import BookController from '../controllers/BookController'
 import { check } from 'express-validator';
 
+
 export default function booksRoutes(app: express.Application) {
   let validations = [
     check('title').isLength({ min: 5 }).withMessage('O título precisa ter no mínimo 5 caracteres!'),
@@ -17,7 +18,5 @@ export default function booksRoutes(app: express.Application) {
   app.route('/book/:id')
     .put(validations, controller.edit())
     .get(controller.read());
-
-
 
 }

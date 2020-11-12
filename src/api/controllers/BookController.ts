@@ -1,56 +1,76 @@
 import { validationResult } from 'express-validator/check';
 import { Request, Response } from 'express'
-import BookDao from '../infra/BookDao';
-import db from '../../config/database';
-
+import Book from '../models/Book'
 
 
 export default class BookController {
 
     browse() {
-        return (request: Request, response: Response) => {
-            const dao = new BookDao(db);
-            dao.list()
-                .then(entities => response.json(entities))
-                .catch(error => console.log(error));
+        return async (request: Request, response: Response) => {
+            await Book
+                .find({})
+                .then(
+                    (entities) => { response.status(200).send(entities) },
+                    (error) => { response.status(500).send(error) }
+                );
         }
     }
 
     read() {
-        return (request: Request, response: Response) => {
-            const id = request.params.id;
-            const dao = new BookDao(db);
-            dao.search(parseInt(id))
-                .then(entity => response.json(entity))
-                .catch(error => console.log(error));
+        return async (request: Request, response: Response) => {
+            await Book
+                .find({ _id: request.params.id })
+                .then(
+                    (entity) => {
+                        if (!entity) throw Error('Book not found.')
+                        response.status(200).send(entity)
+                    },
+                    (error) => {
+                        response.status(404).send(error)
+                    }
+                );
         }
     }
 
     edit() {
-        return (request: Request, response: Response) => {
+        return async (request: Request, response: Response) => {
             const errors = validationResult(request);
 
             if (!errors.isEmpty()) {
                 return response.json(errors.array());
             }
 
-            const dao = new BookDao(db);
-            dao.update(request.body)
-                .then(() => response.status(200).send('Success!'))
-                .catch(erro => console.log(erro));
+            await Book
+                .findByIdAndUpdate({ _id: request.params.id }, request.body)
+                .then(
+                    (book) => {
+                        response.status(200).send(book)
+                    },
+                    (error) => {
+                        response.status(404).send(error)
+                    }
+                );
         }
     }
 
     add() {
-        return (request: Request, response: Response) => {
+        return async (request: Request, response: Response) => {
             const errors = validationResult(request);
             if (!errors.isEmpty()) {
                 return response.json(errors.array());
             }
-            const dao = new BookDao(db);
-            dao.add(request.body)
-                .then(() => response.status(201).send('Created!'))
-                .catch(erro => console.log(erro));
+
+            await Book
+                .create(request.body)
+                .then(
+                    (book) => {
+                        response.status(201).send(book)
+                    },
+                    (error) => {
+                        response.status(404).send(error)
+                    }
+                );
+
         }
     }
 

@@ -1,74 +1,82 @@
 import { validationResult } from 'express-validator/check';
 import { Request, Response } from 'express'
-import AuthorDao from '../infra/AuthorDao';
-import db from '../../config/database';
+import Author from '../models/Author'
 
 
-
-export default class BookController {
+export default class AuthorController {
 
     browse() {
-        return (request: Request, response: Response) => {
-            const dao = new AuthorDao(db);
-            dao.list()
-                .then(entities => response.json(entities))
-                .catch(error => {
-                    console.log(error);
-                    response.status(500).send('Error!');
-                });
+        return async (request: Request, response: Response) => {
+            await Author
+                .find({})
+                .then(
+                    (entities) => { response.status(200).send(entities) },
+                    (error) => { response.status(500).send(error) }
+                );
         }
     }
 
     read() {
-        return (request: Request, response: Response) => {
-            const id = request.params.id;
-            const dao = new AuthorDao(db);
-            dao.search(parseInt(id))
-                .then(entity => response.json(entity))
-                .catch(error => {
-                    console.log(error);
-                    response.status(500).send('Error!');
-                });
+        return async (request: Request, response: Response) => {
+            await Author
+                .find({ "_id": request.params.id })
+                .then(
+                    (entity) => {
+                        if (!entity) throw Error('Author not found.')
+                        response.status(200).send(entity)
+                    },
+                    (error) => {
+                        response.status(404).send(error)
+                    }
+                );
         }
     }
 
     edit() {
-        return (request: Request, response: Response) => {
+        return async (request: Request, response: Response) => {
             const errors = validationResult(request);
 
             if (!errors.isEmpty()) {
                 return response.json(errors.array());
             }
 
-            const dao = new AuthorDao(db);
-            dao.update(request.body)
-                .then(() => response.status(200).send('Success!'))
-                .catch(error => {
-                    console.log(error);
-                    response.status(500).send('Error!');
-                });
+            await Author
+                .findByIdAndUpdate({ _id: request.params.id }, request.body)
+                .then(
+                    (Author) => {
+                        response.status(200).send(Author)
+                    },
+                    (error) => {
+                        response.status(404).send(error)
+                    }
+                );
         }
     }
 
     add() {
-        return (request: Request, response: Response) => {
+        return async (request: Request, response: Response) => {
             const errors = validationResult(request);
             if (!errors.isEmpty()) {
                 return response.json(errors.array());
             }
-            const dao = new AuthorDao(db);
-            dao.add(request.body)
-                .then(() => response.status(201).send('Created!'))
-                .catch(error => {
-                    console.log(error);
-                    response.status(500).send('Error!');
-                });
+
+            await Author
+                .create(request.body)
+                .then(
+                    (Author) => {
+                        response.status(201).send(Author)
+                    },
+                    (error) => {
+                        response.status(404).send(error)
+                    }
+                );
+
         }
     }
 
     delete() {
         return (request: Request, response: Response) => {
-            return response.status(200).send('Not implemented yet!')            
+            return response.status(200).send('Not implemented yet!')
         }
     }
 }

@@ -1,4 +1,35 @@
-export default class Author {
+import mongoose from 'mongoose'
 
-    constructor(public readonly _id: number, public name: string) { }
+interface IAuthorDocument extends mongoose.Document {
+    title: string;
+    description: string
 }
+
+interface IAuthor {
+    name: string;
+    url_photo: string;
+}
+
+const schema = new mongoose.Schema({
+    name: {
+        type: String,
+        required: true
+    },
+    url_photo: {
+        type: String
+    }
+
+})
+
+interface IAuthorModel extends mongoose.Model<IAuthorDocument> {
+    build(attr: IAuthor): IAuthorDocument;
+}
+
+schema.statics.build = (attr: IAuthor) => {
+    return new Author(attr);
+}
+
+const Author = mongoose.model<IAuthorDocument, IAuthorModel>('Author', schema);
+
+
+export default Author
